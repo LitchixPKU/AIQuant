@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="量化投资课程 WorkBuddy 网页生成过程归档">
+  <title>WorkBuddy 生成过程页 · AIQuant</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07101d;
+      --panel: rgba(15, 30, 52, 0.86);
+      --panel-2: rgba(10, 22, 39, 0.92);
+      --line: rgba(148, 163, 184, 0.18);
+      --text: #f8fafc;
+      --muted: #aab6ca;
+      --cyan: #67e8f9;
+      --violet: #c4b5fd;
+      --green: #86efac;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 10% 5%, rgba(34, 211, 238, 0.14), transparent 28%),
+        radial-gradient(circle at 90% 12%, rgba(139, 92, 246, 0.18), transparent 30%),
+        linear-gradient(145deg, #050a12, var(--bg) 55%, #0a1728);
+    }
+
+    a { color: inherit; }
+
+    main {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 56px 0 80px;
+    }
+
+    .back {
+      display: inline-flex;
+      margin-bottom: 28px;
+      color: var(--cyan);
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 800px;
+      margin: 0;
+      font-size: clamp(36px, 6vw, 66px);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+
+    .intro {
+      max-width: 820px;
+      margin: 20px 0 38px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .weekend {
+      padding: 18px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .weekend strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--green);
+      font-size: 14px;
+    }
+
+    .weekend span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .tasks {
+      display: grid;
+      gap: 18px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 26px;
+      padding: 26px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 18px 56px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(14px);
+    }
+
+    .task-number {
+      color: var(--violet);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+    }
+
+    h2 {
+      margin: 9px 0 12px;
+      font-size: 21px;
+      line-height: 1.45;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-content: start;
+    }
+
+    .page-link {
+      display: flex;
+      min-height: 70px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .page-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(103, 232, 249, 0.48);
+    }
+
+    .page-link span:first-child {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .arrow {
+      flex: 0 0 auto;
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .note {
+      margin-top: 24px;
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      background: rgba(250, 204, 21, 0.055);
+      border: 1px solid rgba(250, 204, 21, 0.16);
+      border-radius: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .timeline { grid-template-columns: 1fr; }
+      .task { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      main { padding-top: 34px; }
+      .links { grid-template-columns: 1fr; }
+      .task { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../">← 返回 AIQuant 首页</a>
+    <p class="eyebrow">AIQuant · WorkBuddy Archive</p>
+    <h1>量化投资<br>网页生成过程归档</h1>
+    <p class="intro">
+      以下页面按照课程提交截止时间、原文件最后修改时间和最终作业中的看板 PDF 交叉归档。
+      同一周末生成的页面被归入同一组 Task，保留当时的实验参数与展示形态。
+    </p>
+
+    <section class="timeline" aria-label="作业周末时间线">
+      <div class="weekend">
+        <strong>第一周末 · 2026-07-04</strong>
+        <span>Task1 / Task2<br>提交截止：2026-07-05 00:00</span>
+      </div>
+      <div class="weekend">
+        <strong>第二周末 · 2026-07-11</strong>
+        <span>Task3 / Task4<br>提交截止：2026-07-12 00:00</span>
+      </div>
+      <div class="weekend">
+        <strong>第三周末 · 2026-07-18</strong>
+        <span>Task5 / Task6<br>提交截止：2026-07-19 00:00</span>
+      </div>
+    </section>
+
+    <section class="tasks" aria-label="Task 网页归档">
+      <article class="task">
+        <div>
+          <span class="task-number">TASK 1</span>
+          <h2>量化交易初体验：从零搭建数据引擎</h2>
+          <p class="meta">生成时间：2026-07-04 16:28–18:03<br>依据：K线、交易量、A/H股及多标的行情展示</p>
+        </div>
+        <div class="links">
+          <a class="page-link" href="./task1/688981_kline.html"><span>中芯国际 K线图与交易量</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task1/688981_ah_compare.html"><span>中芯国际 A/H股行情对比</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task1/dashboard.html"><span>四标的行情可视化看板</span><span class="arrow">→</span></a>
+        </div>
+      </article>
+
+      <article class="task">
+        <div>
+          <span class="task-number">TASK 2</span>
+          <h2>数据炼金术：数据诊断与构造交易指标</h2>
+          <p class="meta">生成时间：2026-07-04 22:03<br>依据：数据缺失、异常值、描述性统计与诊断结果</p>
+        </div>
+        <div class="links">
+          <a class="page-link" href="./task2/diagnosis_dashboard.html"><span>数据诊断分析看板</span><span class="arrow">→</span></a>
+        </div>
+      </article>
+
+      <article class="task">
+        <div>
+          <span class="task-number">TASK 3</span>
+          <h2>策略首秀：用均线交叉反应市场趋势变化</h2>
+          <p class="meta">生成时间：2026-07-11 21:29–22:09<br>依据：最终看板 PDF 与 MA5/15、MA10/30、MA20/60 回测页</p>
+        </div>
+        <div class="links">
+          <a class="page-link" href="./task3/ma_strategy_dashboard.html"><span>中芯国际 A+H · MA5/15</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task3/ma_strategy_000001.html"><span>中国平安 · MA5/15</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task3/ma_strategy_000001_ma10_30.html"><span>中国平安 · MA10/30</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task3/ma_strategy_000001_ma20_60.html"><span>中国平安 · MA20/60</span><span class="arrow">→</span></a>
+        </div>
+      </article>
+
+      <article class="task">
+        <div>
+          <span class="task-number">TASK 4</span>
+          <h2>复刻传奇：海龟交易法则实战演练</h2>
+          <p class="meta">生成时间：2026-07-11 22:47–23:33<br>依据：价格通道 + ATR 与唐奇安通道突破策略看板</p>
+        </div>
+        <div class="links">
+          <a class="page-link" href="./task4/600519_price_channel_atr.html"><span>贵州茅台 · 价格通道 + ATR</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task4/688981_price_channel_atr.html"><span>中芯国际 A · 价格通道 + ATR</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task4/000001_price_channel_atr.html"><span>中国平安 · 价格通道 + ATR</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task4/donchian_strategy_000001.html"><span>中国平安 · 唐奇安通道 DC20</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task4/donchian_strategy_688981_dc20.html"><span>中芯国际 A · 唐奇安通道 DC20</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task4/donchian_strategy_000001_dc10.html"><span>中国平安 · 唐奇安通道 DC10</span><span class="arrow">→</span></a>
+          <a class="page-link" href="./task4/donchian_strategy_000001_dc40.html"><span>中国平安 · 唐奇安通道 DC40</span><span class="arrow">→</span></a>
+        </div>
+      </article>
+
+      <article class="task">
+        <div>
+          <span class="task-number">TASK 5</span>
+          <h2>AI交易引擎：机器学习算法与场景应用</h2>
+          <p class="meta">生成时间：2026-07-18 13:00<br>依据：分类模型实验页面与最终 Task5 看板 PDF</p>
+        </div>
+        <div class="links">
+          <a class="page-link" href="./task5/dashboard.html"><span>股票收益分类模型实验看板 · 原始生成页</span><span class="arrow">→</span></a>
+        </div>
+      </article>
+
+      <article class="task">
+        <div>
+          <span class="task-number">TASK 6</span>
+          <h2>智能决策者：用机器学习定制专属策略</h2>
+          <p class="meta">生成时间：2026-07-18 13:13<br>依据：模型交易策略回测页面与最终 Task6 看板 PDF</p>
+        </div>
+        <div class="links">
+          <a class="page-link" href="./task6/backtest_dashboard.html"><span>股票分类模型交易策略回测看板 · 原始生成页</span><span class="arrow">→</span></a>
+        </div>
+      </article>
+    </section>
+
+    <p class="note">
+      归档源文件夹中没有 2026-07-25 前后生成的 HTML，因此本页未添加 Task7/Task8 过程网页。
+      截图中 Task7 的截止时间为 2026-07-26 00:00；Task8 的截止时间行未出现在截图范围内。
+    </p>
+  </main>
+</body>
+</html>

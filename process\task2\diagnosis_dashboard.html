@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据诊断分析看板 — 2026-07-04 22:03</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333;line-height:1.6}
+.hdr{background:linear-gradient(135deg,#0d47a1,#1565c0);color:#fff;padding:24px 30px;text-align:center}
+.hdr h1{font-size:26px;margin-bottom:4px}
+.hdr p{font-size:13px;opacity:0.8}
+.main{max-width:1500px;margin:0 auto;padding:24px}
+.section-title{font-size:20px;font-weight:700;margin:28px 0 14px;padding-left:12px;border-left:4px solid #1565c0;color:#0d47a1}
+.badge{display:inline-block;font-size:11px;padding:2px 10px;border-radius:12px;margin-right:8px;font-weight:600}
+.badge-股票{background:#fff3e0;color:#e65100}
+.badge-ETF{background:#e8f5e9;color:#2e7d32}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+.tbl thead{background:#f5f5f5;position:sticky;top:0}
+.tbl th,.tbl td{padding:7px 10px;border:1px solid #e0e0e0;text-align:right}
+.tbl td:first-child,.tbl th:first-child{text-align:left;font-size:12px}
+.tbl-wrap{max-height:520px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;margin-bottom:12px}
+.tight td,.tight th{padding:4px 8px;font-size:12px}
+.fw-bold{font-weight:700}
+.text-red{color:#ef5350;font-weight:700}
+.text-green{color:#26a69a;font-weight:700}
+.text-muted{color:#999}
+.z-high td{background:#fff5f5}
+.z-low td{background:#f1f8e9}
+.overview-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card-icon{font-size:24px;display:block;margin-bottom:4px}
+.card-title{font-size:12px;color:#999;text-transform:uppercase;margin-bottom:4px}
+.card-body{font-size:20px;font-weight:700}
+.card.warn{border-left:4px solid #ff9800}
+.card.good{border-left:4px solid #4caf50}
+.card.info{border-left:4px solid #2196f3}
+.sec-card{background:#fff;border-radius:8px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.sec-card h3{font-size:17px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #e3f2fd}
+.sec-card h4{font-size:14px;color:#0d47a1;margin-bottom:8px}
+.stat-grid{display:grid;grid-template-columns:3fr 2fr;gap:20px}
+@media(max-width:900px){.stat-grid{grid-template-columns:1fr}.overview-cards{grid-template-columns:repeat(3,1fr)}}
+.ft{text-align:center;padding:24px;font-size:12px;color:#999}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>📋 数据诊断分析看板</h1>
+  <p>6个标的 · 缺失值检查 · 描述性统计 · 异常值检测</p>
+</div>
+<div class="main">
+
+<!-- Overview Summary -->
+<div class="section-title">一、数据概览</div>
+<div class="overview-cards">
+  <div class="card info"><span class="card-icon">📦</span><div class="card-title">标的数量</div><div class="card-body"><b>6</b> 个</div></div>
+  <div class="card good"><span class="card-icon">✅</span><div class="card-title">无缺失值</div><div class="card-body"><b>6/6</b> 标的</div></div>
+  <div class="card info"><span class="card-icon">📅</span><div class="card-title">最早日期</div><div class="card-body"><b>2024-01-02</b></div></div>
+  <div class="card info"><span class="card-icon">📅</span><div class="card-title">最晚日期</div><div class="card-body"><b>2026-07-03</b></div></div>
+  <div class="card good"><span class="card-icon">📈</span><div class="card-title">盈利标的</div><div class="card-body"><b>4/6</b> 累计收益为正</div></div>
+  <div class="card warn"><span class="card-icon">⚠️</span><div class="card-title">异常日合计</div><div class="card-body"><b>17</b> 天</div></div>
+</div>
+
+<div class="tbl-wrap">
+<table class="tbl">
+<thead><tr>
+  <th>类型</th><th>代码</th><th>名称</th><th>行数</th><th>日期范围</th><th>缺失值</th><th>累计收益</th><th>年化波动</th><th>夏普比率</th><th>最大回撤</th>
+</tr></thead>
+<tbody><tr>
+      <td><span class="badge badge-ETF">ETF</span></td>
+      <td class="fw-bold">515120.SH</td>
+      <td>创新药ETF广发</td>
+      <td>242</td>
+      <td>2025-07-04 ~ 2026-07-03</td>
+      <td class="text-green">✅ 无</td>
+      <td style="color:#ef5350">+5.72%</td>
+      <td>26.75%</td>
+      <td>0.3407</td>
+      <td style="color:#ef5350">-30.08%</td>
+    </tr><tr>
+      <td><span class="badge badge-ETF">ETF</span></td>
+      <td class="fw-bold">159363.SZ</td>
+      <td>创业板AI ETF</td>
+      <td>242</td>
+      <td>2025-07-04 ~ 2026-07-03</td>
+      <td class="text-green">✅ 无</td>
+      <td style="color:#ef5350">+36.56%</td>
+      <td>68.35%</td>
+      <td>0.8984</td>
+      <td style="color:#ef5350">-50.46%</td>
+    </tr><tr>
+      <td><span class="badge badge-股票">股票</span></td>
+      <td class="fw-bold">300308.SZ</td>
+      <td>中际旭创</td>
+      <td>242</td>
+      <td>2025-07-04 ~ 2026-07-03</td>
+      <td class="text-green">✅ 无</td>
+      <td style="color:#ef5350">+700.29%</td>
+      <td>71.38%</td>
+      <td>3.2857</td>
+      <td style="color:#ef5350">-21.34%</td>
+    </tr><tr>
+      <td><span class="badge badge-股票">股票</span></td>
+      <td class="fw-bold">600519.SH</td>
+      <td>贵州茅台</td>
+      <td>242</td>
+      <td>2025-07-04 ~ 2026-07-03</td>
+      <td class="text-green">✅ 无</td>
+      <td style="color:#26a69a">-16.02%</td>
+      <td>20.36%</td>
+      <td>-0.7604</td>
+      <td style="color:#ef5350">-24.85%</td>
+    </tr><tr>
+      <td><span class="badge badge-股票">股票</span></td>
+      <td class="fw-bold">000001.SZ</td>
+      <td>平安银行</td>
+      <td>372</td>
+      <td>2024-01-02 ~ 2025-07-17</td>
+      <td class="text-green">✅ 无</td>
+      <td style="color:#ef5350">+36.7%</td>
+      <td>23.33%</td>
+      <td>0.9904</td>
+      <td style="color:#ef5350">-16.93%</td>
+    </tr><tr>
+      <td><span class="badge badge-股票">股票</span></td>
+      <td class="fw-bold">600031.SH</td>
+      <td>三一重工</td>
+      <td>129</td>
+      <td>2025-01-02 ~ 2025-07-16</td>
+      <td class="text-green">✅ 无</td>
+      <td style="color:#ef5350">+18.64%</td>
+      <td>25.6%</td>
+      <td>1.3897</td>
+      <td style="color:#ef5350">-15.09%</td>
+    </tr></tbody>
+</table>
+</div>
+
+<!-- Detailed Stats -->
+<div class="section-title">二、描述性统计 & 异常值详情</div>
+
+    <div class="sec-card">
+      <h3><span class="badge badge-ETF">ETF</span> 515120.SH — 创新药ETF广发</h3>
+      <div class="stat-grid">
+        <div>
+          <h4>📊 价格描述性统计</h4>
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>字段</th><th>均值</th><th>标准差</th><th>最小值</th><th>最大值</th><th>P25</th><th>P50</th><th>P75</th></tr></thead>
+            <tbody><tr>
+          <td class="fw-bold">open</td>
+          <td>0.644</td><td>0.050</td>
+          <td>0.528</td><td>0.756</td>
+          <td>0.613</td><td>0.643</td><td>0.680</td>
+        </tr><tr>
+          <td class="fw-bold">high</td>
+          <td>0.652</td><td>0.051</td>
+          <td>0.534</td><td>0.771</td>
+          <td>0.623</td><td>0.649</td><td>0.687</td>
+        </tr><tr>
+          <td class="fw-bold">low</td>
+          <td>0.637</td><td>0.049</td>
+          <td>0.520</td><td>0.744</td>
+          <td>0.607</td><td>0.637</td><td>0.669</td>
+        </tr><tr>
+          <td class="fw-bold">close</td>
+          <td>0.645</td><td>0.050</td>
+          <td>0.530</td><td>0.758</td>
+          <td>0.615</td><td>0.642</td><td>0.680</td>
+        </tr><tr><td class="fw-bold">日收益率(%)</td>
+      <td>0.0377</td><td>1.7198</td>
+      <td>-4.5685</td><td>8.8652</td>
+      <td colspan="3">偏度: 0.8908 | 峰度: 2.9756</td></tr><tr><td class="fw-bold">vol</td>
+          <td>5559551</td><td>3177334</td>
+          <td>1871118</td><td>27188864</td>
+          <td colspan="2">中位数: 4913890</td><td></td></tr><tr><td class="fw-bold">amount</td>
+          <td>3.57亿</td><td>2.01亿</td>
+          <td colspan="4">中位数: 3.11亿</td><td></td></tr><tr><td class="fw-bold">风险指标</td>
+      <td colspan="2">年化波动: 26.75%</td>
+      <td colspan="2">夏普比率: 0.3407</td>
+      <td colspan="3">最大回撤: <span style="color:#ef5350">-30.08%</span> (2026-06-08)</td></tr><tr><td class="fw-bold">涨跌统计</td>
+      <td colspan="2">上涨: <span style="color:#ef5350">113天</span></td>
+      <td colspan="2">下跌: <span style="color:#26a69a">123天</span></td>
+      <td colspan="3">平盘: 5天 | 累计: <span style="color:#ef5350">+5.72%</span></td></tr></tbody>
+          </table>
+          </div>
+        </div>
+        <div>
+          <h4>⚠️ 异常日检测 (3σ, 阈值=±5.1593%)</h4>
+          <p style="font-size:13px;margin-bottom:8px">共检测到 <b>2</b> 个异常日</p>
+          <table class="tbl tight">
+          <thead><tr><th>日期</th><th>日收益率</th><th>Z-score</th></tr></thead>
+          <tbody><tr class="z-high">
+              <td>2026-04-01</td>
+              <td style="color:#ef5350">+5.3746%</td>
+              <td>+3.1σ</td>
+            </tr><tr class="z-high">
+              <td>2026-06-29</td>
+              <td style="color:#ef5350">+8.8652%</td>
+              <td>+5.1σ</td>
+            </tr></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <h3><span class="badge badge-ETF">ETF</span> 159363.SZ — 创业板AI ETF</h3>
+      <div class="stat-grid">
+        <div>
+          <h4>📊 价格描述性统计</h4>
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>字段</th><th>均值</th><th>标准差</th><th>最小值</th><th>最大值</th><th>P25</th><th>P50</th><th>P75</th></tr></thead>
+            <tbody><tr>
+          <td class="fw-bold">open</td>
+          <td>1.031</td><td>0.239</td>
+          <td>0.580</td><td>1.565</td>
+          <td>0.864</td><td>1.038</td><td>1.152</td>
+        </tr><tr>
+          <td class="fw-bold">high</td>
+          <td>1.054</td><td>0.245</td>
+          <td>0.593</td><td>1.595</td>
+          <td>0.879</td><td>1.065</td><td>1.169</td>
+        </tr><tr>
+          <td class="fw-bold">low</td>
+          <td>1.015</td><td>0.234</td>
+          <td>0.577</td><td>1.527</td>
+          <td>0.843</td><td>1.030</td><td>1.130</td>
+        </tr><tr>
+          <td class="fw-bold">close</td>
+          <td>1.036</td><td>0.240</td>
+          <td>0.590</td><td>1.593</td>
+          <td>0.867</td><td>1.042</td><td>1.154</td>
+        </tr><tr><td class="fw-bold">日收益率(%)</td>
+      <td>0.2537</td><td>4.3934</td>
+      <td>-50.1259</td><td>9.6866</td>
+      <td colspan="3">偏度: -6.1928 | 峰度: 71.5781</td></tr><tr><td class="fw-bold">vol</td>
+          <td>8491066</td><td>4181420</td>
+          <td>938590</td><td>28062766</td>
+          <td colspan="2">中位数: 8062754</td><td></td></tr><tr><td class="fw-bold">amount</td>
+          <td>8.87亿</td><td>4.59亿</td>
+          <td colspan="4">中位数: 8.12亿</td><td></td></tr><tr><td class="fw-bold">风险指标</td>
+      <td colspan="2">年化波动: 68.35%</td>
+      <td colspan="2">夏普比率: 0.8984</td>
+      <td colspan="3">最大回撤: <span style="color:#ef5350">-50.46%</span> (2025-07-22)</td></tr><tr><td class="fw-bold">涨跌统计</td>
+      <td colspan="2">上涨: <span style="color:#ef5350">127天</span></td>
+      <td colspan="2">下跌: <span style="color:#26a69a">109天</span></td>
+      <td colspan="3">平盘: 5天 | 累计: <span style="color:#ef5350">+36.56%</span></td></tr></tbody>
+          </table>
+          </div>
+        </div>
+        <div>
+          <h4>⚠️ 异常日检测 (3σ, 阈值=±13.1803%)</h4>
+          <p style="font-size:13px;margin-bottom:8px">共检测到 <b>1</b> 个异常日</p>
+          <table class="tbl tight">
+          <thead><tr><th>日期</th><th>日收益率</th><th>Z-score</th></tr></thead>
+          <tbody><tr class="z-low">
+              <td>2025-07-21</td>
+              <td style="color:#26a69a">-50.1259%</td>
+              <td>-11.5σ</td>
+            </tr></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <h3><span class="badge badge-股票">股票</span> 300308.SZ — 中际旭创</h3>
+      <div class="stat-grid">
+        <div>
+          <h4>📊 价格描述性统计</h4>
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>字段</th><th>均值</th><th>标准差</th><th>最小值</th><th>最大值</th><th>P25</th><th>P50</th><th>P75</th></tr></thead>
+            <tbody><tr>
+          <td class="fw-bold">open</td>
+          <td>596.322</td><td>299.637</td>
+          <td>134.760</td><td>1395.000</td>
+          <td>410.053</td><td>555.500</td><td>636.743</td>
+        </tr><tr>
+          <td class="fw-bold">high</td>
+          <td>616.739</td><td>309.020</td>
+          <td>139.770</td><td>1416.880</td>
+          <td>429.990</td><td>573.835</td><td>657.330</td>
+        </tr><tr>
+          <td class="fw-bold">low</td>
+          <td>581.350</td><td>292.343</td>
+          <td>130.210</td><td>1343.380</td>
+          <td>397.650</td><td>539.660</td><td>618.308</td>
+        </tr><tr>
+          <td class="fw-bold">close</td>
+          <td>600.163</td><td>301.213</td>
+          <td>135.150</td><td>1382.330</td>
+          <td>411.990</td><td>556.355</td><td>638.450</td>
+        </tr><tr><td class="fw-bold">日收益率(%)</td>
+      <td>0.9691</td><td>4.5883</td>
+      <td>-13.3860</td><td>16.6800</td>
+      <td colspan="3">偏度: 0.5679 | 峰度: 0.9638</td></tr><tr><td class="fw-bold">vol</td>
+          <td>370714</td><td>131972</td>
+          <td>177310</td><td>939057</td>
+          <td colspan="2">中位数: 346136</td><td></td></tr><tr><td class="fw-bold">amount</td>
+          <td>203.33亿</td><td>89.91亿</td>
+          <td colspan="4">中位数: 185.30亿</td><td></td></tr><tr><td class="fw-bold">风险指标</td>
+      <td colspan="2">年化波动: 71.38%</td>
+      <td colspan="2">夏普比率: 3.2857</td>
+      <td colspan="3">最大回撤: <span style="color:#ef5350">-21.34%</span> (2025-10-14)</td></tr><tr><td class="fw-bold">涨跌统计</td>
+      <td colspan="2">上涨: <span style="color:#ef5350">135天</span></td>
+      <td colspan="2">下跌: <span style="color:#26a69a">106天</span></td>
+      <td colspan="3">平盘: 0天 | 累计: <span style="color:#ef5350">+700.29%</span></td></tr></tbody>
+          </table>
+          </div>
+        </div>
+        <div>
+          <h4>⚠️ 异常日检测 (3σ, 阈值=±13.765%)</h4>
+          <p style="font-size:13px;margin-bottom:8px">共检测到 <b>3</b> 个异常日</p>
+          <table class="tbl tight">
+          <thead><tr><th>日期</th><th>日收益率</th><th>Z-score</th></tr></thead>
+          <tbody><tr class="z-high">
+              <td>2025-07-15</td>
+              <td style="color:#ef5350">+16.6800%</td>
+              <td>+3.4σ</td>
+            </tr><tr class="z-high">
+              <td>2025-08-25</td>
+              <td style="color:#ef5350">+14.7365%</td>
+              <td>+3.0σ</td>
+            </tr><tr class="z-low">
+              <td>2025-09-04</td>
+              <td style="color:#26a69a">-13.3860%</td>
+              <td>-3.1σ</td>
+            </tr></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <h3><span class="badge badge-股票">股票</span> 600519.SH — 贵州茅台</h3>
+      <div class="stat-grid">
+        <div>
+          <h4>📊 价格描述性统计</h4>
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>字段</th><th>均值</th><th>标准差</th><th>最小值</th><th>最大值</th><th>P25</th><th>P50</th><th>P75</th></tr></thead>
+            <tbody><tr>
+          <td class="fw-bold">open</td>
+          <td>1411.766</td><td>73.053</td>
+          <td>1169.000</td><td>1555.000</td>
+          <td>1400.000</td><td>1426.105</td><td>1458.750</td>
+        </tr><tr>
+          <td class="fw-bold">high</td>
+          <td>1423.384</td><td>72.447</td>
+          <td>1195.670</td><td>1568.000</td>
+          <td>1407.973</td><td>1436.405</td><td>1468.592</td>
+        </tr><tr>
+          <td class="fw-bold">low</td>
+          <td>1401.363</td><td>73.258</td>
+          <td>1151.010</td><td>1515.000</td>
+          <td>1391.257</td><td>1420.000</td><td>1445.947</td>
+        </tr><tr>
+          <td class="fw-bold">close</td>
+          <td>1411.002</td><td>73.413</td>
+          <td>1168.630</td><td>1555.000</td>
+          <td>1400.925</td><td>1426.865</td><td>1457.598</td>
+        </tr><tr><td class="fw-bold">日收益率(%)</td>
+      <td>-0.0640</td><td>1.3085</td>
+      <td>-3.8008</td><td>8.6146</td>
+      <td colspan="3">偏度: 1.4189 | 峰度: 8.3132</td></tr><tr><td class="fw-bold">vol</td>
+          <td>40620</td><td>18408</td>
+          <td>17803</td><td>189534</td>
+          <td colspan="2">中位数: 36682</td><td></td></tr><tr><td class="fw-bold">amount</td>
+          <td>57.15亿</td><td>25.83亿</td>
+          <td colspan="4">中位数: 51.34亿</td><td></td></tr><tr><td class="fw-bold">风险指标</td>
+      <td colspan="2">年化波动: 20.36%</td>
+      <td colspan="2">夏普比率: -0.7604</td>
+      <td colspan="3">最大回撤: <span style="color:#ef5350">-24.85%</span> (2026-06-26)</td></tr><tr><td class="fw-bold">涨跌统计</td>
+      <td colspan="2">上涨: <span style="color:#ef5350">101天</span></td>
+      <td colspan="2">下跌: <span style="color:#26a69a">140天</span></td>
+      <td colspan="3">平盘: 0天 | 累计: <span style="color:#26a69a">-16.02%</span></td></tr></tbody>
+          </table>
+          </div>
+        </div>
+        <div>
+          <h4>⚠️ 异常日检测 (3σ, 阈值=±3.9256%)</h4>
+          <p style="font-size:13px;margin-bottom:8px">共检测到 <b>2</b> 个异常日</p>
+          <table class="tbl tight">
+          <thead><tr><th>日期</th><th>日收益率</th><th>Z-score</th></tr></thead>
+          <tbody><tr class="z-high">
+              <td>2026-01-29</td>
+              <td style="color:#ef5350">+8.6146%</td>
+              <td>+6.6σ</td>
+            </tr><tr class="z-high">
+              <td>2026-05-29</td>
+              <td style="color:#ef5350">+3.9201%</td>
+              <td>+3.0σ</td>
+            </tr></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <h3><span class="badge badge-股票">股票</span> 000001.SZ — 平安银行</h3>
+      <div class="stat-grid">
+        <div>
+          <h4>📊 价格描述性统计</h4>
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>字段</th><th>均值</th><th>标准差</th><th>最小值</th><th>最大值</th><th>P25</th><th>P50</th><th>P75</th></tr></thead>
+            <tbody><tr>
+          <td class="fw-bold">open</td>
+          <td>10.938</td><td>0.844</td>
+          <td>9.050</td><td>13.430</td>
+          <td>10.300</td><td>11.040</td><td>11.553</td>
+        </tr><tr>
+          <td class="fw-bold">high</td>
+          <td>11.050</td><td>0.855</td>
+          <td>9.180</td><td>13.430</td>
+          <td>10.380</td><td>11.160</td><td>11.652</td>
+        </tr><tr>
+          <td class="fw-bold">low</td>
+          <td>10.854</td><td>0.830</td>
+          <td>8.960</td><td>12.890</td>
+          <td>10.218</td><td>10.990</td><td>11.473</td>
+        </tr><tr>
+          <td class="fw-bold">close</td>
+          <td>10.954</td><td>0.837</td>
+          <td>9.090</td><td>13.180</td>
+          <td>10.325</td><td>11.085</td><td>11.553</td>
+        </tr><tr><td class="fw-bold">日收益率(%)</td>
+      <td>0.0955</td><td>1.4996</td>
+      <td>-9.3168</td><td>9.9796</td>
+      <td colspan="3">偏度: 0.4127 | 峰度: 11.2336</td></tr><tr><td class="fw-bold">vol</td>
+          <td>1320700</td><td>753730</td>
+          <td>353013</td><td>5888978</td>
+          <td colspan="2">中位数: 1108879</td><td></td></tr><tr><td class="fw-bold">amount</td>
+          <td>0.01亿</td><td>0.01亿</td>
+          <td colspan="4">中位数: 0.01亿</td><td></td></tr><tr><td class="fw-bold">风险指标</td>
+      <td colspan="2">年化波动: 23.33%</td>
+      <td colspan="2">夏普比率: 0.9904</td>
+      <td colspan="3">最大回撤: <span style="color:#ef5350">-16.93%</span> (2025-04-07)</td></tr><tr><td class="fw-bold">涨跌统计</td>
+      <td colspan="2">上涨: <span style="color:#ef5350">184天</span></td>
+      <td colspan="2">下跌: <span style="color:#26a69a">180天</span></td>
+      <td colspan="3">平盘: 7天 | 累计: <span style="color:#ef5350">+36.7%</span></td></tr></tbody>
+          </table>
+          </div>
+        </div>
+        <div>
+          <h4>⚠️ 异常日检测 (3σ, 阈值=±4.4989%)</h4>
+          <p style="font-size:13px;margin-bottom:8px">共检测到 <b>7</b> 个异常日</p>
+          <table class="tbl tight">
+          <thead><tr><th>日期</th><th>日收益率</th><th>Z-score</th></tr></thead>
+          <tbody><tr class="z-high">
+              <td>2024-02-21</td>
+              <td style="color:#ef5350">+9.9796%</td>
+              <td>+6.6σ</td>
+            </tr><tr class="z-low">
+              <td>2024-06-14</td>
+              <td style="color:#26a69a">-5.7407%</td>
+              <td>-3.9σ</td>
+            </tr><tr class="z-high">
+              <td>2024-09-26</td>
+              <td style="color:#ef5350">+6.1905%</td>
+              <td>+4.1σ</td>
+            </tr><tr class="z-high">
+              <td>2024-09-30</td>
+              <td style="color:#ef5350">+6.9177%</td>
+              <td>+4.5σ</td>
+            </tr><tr class="z-high">
+              <td>2024-10-08</td>
+              <td style="color:#ef5350">+5.4873%</td>
+              <td>+3.6σ</td>
+            </tr><tr class="z-low">
+              <td>2024-10-09</td>
+              <td style="color:#26a69a">-9.3168%</td>
+              <td>-6.3σ</td>
+            </tr><tr class="z-low">
+              <td>2025-04-07</td>
+              <td style="color:#26a69a">-5.6437%</td>
+              <td>-3.8σ</td>
+            </tr></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <h3><span class="badge badge-股票">股票</span> 600031.SH — 三一重工</h3>
+      <div class="stat-grid">
+        <div>
+          <h4>📊 价格描述性统计</h4>
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>字段</th><th>均值</th><th>标准差</th><th>最小值</th><th>最大值</th><th>P25</th><th>P50</th><th>P75</th></tr></thead>
+            <tbody><tr>
+          <td class="fw-bold">open</td>
+          <td>18.244</td><td>1.374</td>
+          <td>15.310</td><td>20.500</td>
+          <td>17.600</td><td>18.450</td><td>19.200</td>
+        </tr><tr>
+          <td class="fw-bold">high</td>
+          <td>18.463</td><td>1.377</td>
+          <td>15.540</td><td>20.750</td>
+          <td>17.760</td><td>18.880</td><td>19.400</td>
+        </tr><tr>
+          <td class="fw-bold">low</td>
+          <td>18.038</td><td>1.345</td>
+          <td>15.230</td><td>20.230</td>
+          <td>17.320</td><td>18.340</td><td>18.960</td>
+        </tr><tr>
+          <td class="fw-bold">close</td>
+          <td>18.255</td><td>1.363</td>
+          <td>15.310</td><td>20.540</td>
+          <td>17.660</td><td>18.550</td><td>19.190</td>
+        </tr><tr><td class="fw-bold">日收益率(%)</td>
+      <td>0.1470</td><td>1.6453</td>
+      <td>-5.7592</td><td>6.2817</td>
+      <td colspan="3">偏度: 0.5615 | 峰度: 2.0600</td></tr><tr><td class="fw-bold">vol</td>
+          <td>612098</td><td>340873</td>
+          <td>222383</td><td>2198570</td>
+          <td colspan="2">中位数: 493318</td><td></td></tr><tr><td class="fw-bold">amount</td>
+          <td>0.01亿</td><td>0.01亿</td>
+          <td colspan="4">中位数: 0.01亿</td><td></td></tr><tr><td class="fw-bold">风险指标</td>
+      <td colspan="2">年化波动: 25.6%</td>
+      <td colspan="2">夏普比率: 1.3897</td>
+      <td colspan="3">最大回撤: <span style="color:#ef5350">-15.09%</span> (2025-06-19)</td></tr><tr><td class="fw-bold">涨跌统计</td>
+      <td colspan="2">上涨: <span style="color:#ef5350">63天</span></td>
+      <td colspan="2">下跌: <span style="color:#26a69a">64天</span></td>
+      <td colspan="3">平盘: 1天 | 累计: <span style="color:#ef5350">+18.64%</span></td></tr></tbody>
+          </table>
+          </div>
+        </div>
+        <div>
+          <h4>⚠️ 异常日检测 (3σ, 阈值=±4.936%)</h4>
+          <p style="font-size:13px;margin-bottom:8px">共检测到 <b>2</b> 个异常日</p>
+          <table class="tbl tight">
+          <thead><tr><th>日期</th><th>日收益率</th><th>Z-score</th></tr></thead>
+          <tbody><tr class="z-high">
+              <td>2025-02-07</td>
+              <td style="color:#ef5350">+6.2817%</td>
+              <td>+3.7σ</td>
+            </tr><tr class="z-low">
+              <td>2025-04-07</td>
+              <td style="color:#26a69a">-5.7592%</td>
+              <td>-3.6σ</td>
+            </tr></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+</div>
+<div class="ft">数据诊断自动生成 · 2026-07-04 22:03:06 · 仅供参考</div>
+</body>
+</html>

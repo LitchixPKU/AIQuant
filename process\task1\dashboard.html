@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四标的行情可视化看板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333}
+.header{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:20px 30px;text-align:center}
+.header h1{font-size:24px;margin-bottom:5px}
+.header p{font-size:13px;opacity:0.85}
+.tab-bar{display:flex;justify-content:center;gap:10px;padding:15px 20px;background:#fff;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.tab-btn{display:flex;flex-direction:column;align-items:center;padding:10px 24px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;background:#f5f5f5;transition:all .3s;min-width:160px}
+.tab-btn:hover{border-color:#4a90d9;background:#e3f2fd}
+.tab-btn.active{border-color:#1a237e;background:#1a237e;color:#fff}
+.tab-btn.active .tab-code{color:#90caf9}
+.tab-name{font-size:15px;font-weight:700}
+.tab-code{font-size:11px;color:#999;margin-top:2px}
+.main{max-width:1400px;margin:0 auto;padding:20px}
+.overview-box{background:#fff;border-radius:8px;padding:20px 24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.overview-box p{font-size:14px;line-height:1.8;margin-bottom:6px}
+.chart-grid{display:grid;gap:16px}
+.chart-item{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.chart-item h3{font-size:15px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #e3f2fd}
+.chart-item img{width:100%;height:auto;border-radius:4px}
+.footer{text-align:center;padding:20px;font-size:12px;color:#999}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>四标的行情可视化看板</h1>
+  <p>创新药ETF广发(515120) | 创业板AI ETF(159363) | 中际旭创(300308) | 贵州茅台(600519)</p>
+</div>
+<div class="tab-bar">
+<button class="tab-btn active" onclick="showTab(event,'515120')"><span class="tab-name">创新药ETF</span><span class="tab-code">515120.SH</span></button>
+<button class="tab-btn " onclick="showTab(event,'159363')"><span class="tab-name">创业板AI ETF</span><span class="tab-code">159363.SZ</span></button>
+<button class="tab-btn " onclick="showTab(event,'300308')"><span class="tab-name">中际旭创</span><span class="tab-code">300308.SZ</span></button>
+<button class="tab-btn " onclick="showTab(event,'600519')"><span class="tab-name">贵州茅台</span><span class="tab-code">600519.SH</span></button>
+
+</div>
+<div class="main">
+<div id="panel-515120" class="tab-panel" style="display:block">
+  <div class="overview-box"><p><b>行情概述：</b>创新药ETF广发（515120.SH）在2025-07-04 ~ 2026-07-03期间，共有<b>242</b>个交易日。收盘价从 <b>0.61</b> 变动至 <b>0.65</b>，累计涨跌幅为 <b style="color:#ef5350">+5.72%</b>。</p>
+<p><b>价格区间：</b>最高价 <b style="color:#ef5350">0.76</b>（2025-09-08），最低价 <b style="color:#26a69a">0.53</b>（2026-06-08），波动幅度约 <b>43.0%</b>。</p>
+<p><b>成交量概况：</b>日均成交量约 <b>555.96万手</b>。</p></div>
+  <div class="chart-grid">
+    <div class="chart-item"><h3>📈 收盘价走势</h3><img src="charts/515120_close.png" alt="收盘价"></div>
+    <div class="chart-item"><h3>📊 K线图</h3><img src="charts/515120_kline.png" alt="K线图"></div>
+    <div class="chart-item"><h3>📉 交易量</h3><img src="charts/515120_volume.png" alt="交易量"></div>
+  </div>
+</div>
+<div id="panel-159363" class="tab-panel" style="display:none">
+  <div class="overview-box"><p><b>行情概述：</b>创业板人工智能ETF华宝（159363.SZ）在2025-07-04 ~ 2026-07-03期间，共有<b>242</b>个交易日。收盘价从 <b>1.04</b> 变动至 <b>1.42</b>，累计涨跌幅为 <b style="color:#ef5350">+36.56%</b>。</p>
+<p><b>价格区间：</b>最高价 <b style="color:#ef5350">1.59</b>（2026-06-25），最低价 <b style="color:#26a69a">0.59</b>（2025-07-22），波动幅度约 <b>170.0%</b>。</p>
+<p><b>成交量概况：</b>日均成交量约 <b>849.11万手</b>。</p></div>
+  <div class="chart-grid">
+    <div class="chart-item"><h3>📈 收盘价走势</h3><img src="charts/159363_close.png" alt="收盘价"></div>
+    <div class="chart-item"><h3>📊 K线图</h3><img src="charts/159363_kline.png" alt="K线图"></div>
+    <div class="chart-item"><h3>📉 交易量</h3><img src="charts/159363_volume.png" alt="交易量"></div>
+  </div>
+</div>
+<div id="panel-300308" class="tab-panel" style="display:none">
+  <div class="overview-box"><p><b>行情概述：</b>中际旭创（300308.SZ）在2025-07-04 ~ 2026-07-03期间，共有<b>242</b>个交易日。收盘价从 <b>139.45</b> 变动至 <b>1116.00</b>，累计涨跌幅为 <b style="color:#ef5350">+700.29%</b>。</p>
+<p><b>价格区间：</b>最高价 <b style="color:#ef5350">1382.33</b>（2026-06-22），最低价 <b style="color:#26a69a">135.15</b>（2025-07-07），波动幅度约 <b>922.8%</b>。</p>
+<p><b>成交量概况：</b>日均成交量约 <b>37.07万手</b>。</p></div>
+  <div class="chart-grid">
+    <div class="chart-item"><h3>📈 收盘价走势</h3><img src="charts/300308_close.png" alt="收盘价"></div>
+    <div class="chart-item"><h3>📊 K线图</h3><img src="charts/300308_kline.png" alt="K线图"></div>
+    <div class="chart-item"><h3>📉 交易量</h3><img src="charts/300308_volume.png" alt="交易量"></div>
+  </div>
+</div>
+<div id="panel-600519" class="tab-panel" style="display:none">
+  <div class="overview-box"><p><b>行情概述：</b>贵州茅台（600519.SH）在2025-07-04 ~ 2026-07-03期间，共有<b>242</b>个交易日。收盘价从 <b>1422.22</b> 变动至 <b>1194.45</b>，累计涨跌幅为 <b style="color:#26a69a">-16.02%</b>。</p>
+<p><b>价格区间：</b>最高价 <b style="color:#ef5350">1555.00</b>（2026-02-05），最低价 <b style="color:#26a69a">1168.63</b>（2026-06-26），波动幅度约 <b>33.1%</b>。</p>
+<p><b>成交量概况：</b>日均成交量约 <b>4.06万手</b>。</p></div>
+  <div class="chart-grid">
+    <div class="chart-item"><h3>📈 收盘价走势</h3><img src="charts/600519_close.png" alt="收盘价"></div>
+    <div class="chart-item"><h3>📊 K线图</h3><img src="charts/600519_kline.png" alt="K线图"></div>
+    <div class="chart-item"><h3>📉 交易量</h3><img src="charts/600519_volume.png" alt="交易量"></div>
+  </div>
+</div>
+
+</div>
+<div class="footer">数据来源：Tushare Pro / 东方财富 | 时间范围：2025-07-04 ~ 2026-07-04 | 仅供参考，不构成投资建议</div>
+<script>
+function showTab(e,code){
+document.querySelectorAll('.tab-panel').forEach(function(p){p.style.display='none'});
+document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+document.getElementById('panel-'+code).style.display='block';
+e.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>

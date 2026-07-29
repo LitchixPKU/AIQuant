@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中芯国际 (688981) — K线图 & 交易量</title>
+    <script src="../../assets/echarts.min.js"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --subtext: #666666;
+            --border: #e5e5e5;
+            --red: #ef5350;
+            --green: #26a69a;
+            --ma5: #f5a623;
+            --ma10: #4a90d9;
+            --ma20: #e040fb;
+            --ma60: #7e57c2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f6fa;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .stock-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stock-code {
+            font-size: 13px;
+            color: var(--subtext);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: right;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--subtext);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .stat-value.up {
+            color: var(--red);
+        }
+
+        .stat-value.down {
+            color: var(--green);
+        }
+
+        .period-badge {
+            font-size: 12px;
+            color: var(--subtext);
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        /* Main */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* Summary Cards */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            text-align: center;
+        }
+
+        .summary-card .label {
+            font-size: 12px;
+            color: var(--subtext);
+            margin-bottom: 6px;
+        }
+
+        .summary-card .value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .summary-card .change {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .summary-card .change.up {
+            color: var(--red);
+        }
+
+        .summary-card .change.down {
+            color: var(--green);
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .chart-label-row {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+        }
+
+        .chart-label-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chart-label-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        #kline-chart, #volume-chart {
+            width: 100%;
+        }
+
+        /* Data Source */
+        .footer {
+            text-align: center;
+            padding: 16px 24px 32px;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .footer a {
+            color: var(--subtext);
+            text-decoration: none;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            font-size: 14px;
+            color: var(--subtext);
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--border);
+            border-top-color: var(--ma10);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .summary-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .summary-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <span class="stock-name">中芯国际</span>
+            <span class="stock-code">688981.SH · 科创板 · 半导体</span>
+        </div>
+        <div class="header-right">
+            <div class="stat-item">
+                <div class="stat-label">最新价</div>
+                <div class="stat-value" id="latest-price">--</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">涨跌幅</div>
+                <div class="stat-value" id="latest-change">--</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">成交量</div>
+                <div class="stat-value" id="latest-vol">--</div>
+            </div>
+            <span class="period-badge" id="date-range">--</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- Summary Cards -->
+        <div class="summary-row" id="summary-cards">
+            <div class="summary-card">
+                <div class="label">近一年最高</div>
+                <div class="value" style="color:var(--red)" id="max-price">--</div>
+                <div class="change" id="max-date"></div>
+            </div>
+            <div class="summary-card">
+                <div class="label">近一年最低</div>
+                <div class="value" style="color:var(--green)" id="min-price">--</div>
+                <div class="change" id="min-date"></div>
+            </div>
+            <div class="summary-card">
+                <div class="label">近一年涨幅</div>
+                <div class="value" id="year-change">--</div>
+                <div class="change" id="year-change-pct"></div>
+            </div>
+            <div class="summary-card">
+                <div class="label">日均成交量</div>
+                <div class="value" id="avg-vol">--</div>
+                <div class="change">手</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">日均成交额</div>
+                <div class="value" id="avg-amount">--</div>
+                <div class="change">万元</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">交易日数</div>
+                <div class="value" id="total-days">--</div>
+                <div class="change">天</div>
+            </div>
+        </div>
+
+        <!-- K-line Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">K线图</span>
+                <div class="chart-label-row">
+                    <div class="chart-label-item">
+                        <span class="chart-label-dot" style="background:var(--ma5)"></span> MA5
+                    </div>
+                    <div class="chart-label-item">
+                        <span class="chart-label-dot" style="background:var(--ma10)"></span> MA10
+                    </div>
+                    <div class="chart-label-item">
+                        <span class="chart-label-dot" style="background:var(--ma20)"></span> MA20
+                    </div>
+                    <div class="chart-label-item">
+                        <span class="chart-label-dot" style="background:var(--ma60)"></span> MA60
+                    </div>
+                </div>
+            </div>
+            <div id="kline-chart" style="height:500px">
+                <div class="loading-overlay">
+                    <div class="spinner"></div> 正在加载数据...
+                </div>
+            </div>
+        </div>
+
+        <!-- Volume Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">成交量</span>
+                <div class="chart-label-row">
+                    <div class="chart-label-item">
+                        <span class="chart-label-dot" style="background:var(--red)"></span> 涨（收盘≥开盘）
+                    </div>
+                    <div class="chart-label-item">
+                        <span class="chart-label-dot" style="background:var(--green)"></span> 跌（收盘<开盘）
+                    </div>
+                </div>
+            </div>
+            <div id="volume-chart" style="height:220px">
+                <div class="loading-overlay">
+                    <div class="spinner"></div> 正在加载数据...
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            数据来源：<a href="https://tushare.pro" target="_blank">Tushare Pro</a> · 时间范围：2025-07-04 ~ 2026-07-03 · 仅供参考，不构成投资建议
+        </div>
+    </div>
+
+    <script>
+    // 内嵌数据，无需异步加载
+    var EMBEDDED_DATA = [{"date":"2025-07-04","open":86,"high":87.2,"low":84.86,"close":85.8,"vol":252257.45,"amount":2166412.311},{"date":"2025-07-07","open":85.69,"high":86.86,"low":85.37,"close":85.48,"vol":135349.28,"amount":1162397.568},{"date":"2025-07-08","open":85.49,"high":86.85,"low":85.18,"close":86.74,"vol":217668.48,"amount":1876172.23},{"date":"2025-07-09","open":86.65,"high":86.86,"low":85.52,"close":85.85,"vol":183102,"amount":1578143.686},{"date":"2025-07-10","open":85.61,"high":86.17,"low":85.5,"close":85.67,"vol":175639.46,"amount":1506706.468},{"date":"2025-07-11","open":85.7,"high":89.34,"low":85.4,"close":88.16,"vol":469922.38,"amount":4128335.55},{"date":"2025-07-14","open":88.3,"high":88.49,"low":87.47,"close":87.52,"vol":189831.36,"amount":1667925.619},{"date":"2025-07-15","open":87.15,"high":87.95,"low":86.61,"close":87.89,"vol":206173.16,"amount":1800356.659},{"date":"2025-07-16","open":87.73,"high":88.2,"low":86.77,"close":87.12,"vol":196708.51,"amount":1720548.788},{"date":"2025-07-17","open":87.06,"high":89,"low":86.32,"close":88.79,"vol":287922.16,"amount":2535637.954},{"date":"2025-07-18","open":88.75,"high":89.13,"low":87.93,"close":88.51,"vol":219959.93,"amount":1948101.635},{"date":"2025-07-21","open":88.45,"high":89.52,"low":88.04,"close":89.02,"vol":222719.15,"amount":1983498.56},{"date":"2025-07-22","open":88.7,"high":90.55,"low":88.5,"close":89.08,"vol":297420.68,"amount":2662984.479},{"date":"2025-07-23","open":88.9,"high":90.19,"low":88.3,"close":89.39,"vol":316549.41,"amount":2831683.379},{"date":"2025-07-24","open":89.1,"high":92.9,"low":89,"close":91.75,"vol":522324.53,"amount":4779308.503},{"date":"2025-07-25","open":91.74,"high":93.68,"low":90.99,"close":93.47,"vol":442124.79,"amount":4076414.682},{"date":"2025-07-28","open":93.64,"high":93.69,"low":91.96,"close":92.18,"vol":342640.05,"amount":3167887.757},{"date":"2025-07-29","open":92,"high":92.63,"low":90.81,"close":92.17,"vol":294142.08,"amount":2699803.673},{"date":"2025-07-30","open":91.7,"high":91.83,"low":89.74,"close":90.36,"vol":310018.59,"amount":2815721.986},{"date":"2025-07-31","open":90.32,"high":92.75,"low":89.46,"close":89.5,"vol":461988.52,"amount":4187082.774},{"date":"2025-08-01","open":89.2,"high":90.33,"low":88.02,"close":88.29,"vol":274140.33,"amount":2439842.712},{"date":"2025-08-04","open":87.95,"high":90.63,"low":87.88,"close":90.07,"vol":286057.6,"amount":2568808.038},{"date":"2025-08-05","open":89.85,"high":90.58,"low":89.58,"close":90,"vol":195679.4,"amount":1761818.589},{"date":"2025-08-06","open":89.86,"high":91,"low":89.53,"close":90.78,"vol":267797.87,"amount":2418543.09},{"date":"2025-08-07","open":90.7,"high":91.7,"low":89.75,"close":90.59,"vol":315259.94,"amount":2859638.85},{"date":"2025-08-08","open":88,"high":88.5,"low":86.66,"close":86.66,"vol":584730.5,"amount":5098977.106},{"date":"2025-08-11","open":86.69,"high":87.18,"low":86.22,"close":86.96,"vol":279193.14,"amount":2423559.078},{"date":"2025-08-12","open":86.95,"high":90.1,"low":86.42,"close":88.52,"vol":551552.4,"amount":4870773.398},{"date":"2025-08-13","open":88.01,"high":89.23,"low":88,"close":88.66,"vol":384304.42,"amount":3405728.487},{"date":"2025-08-14","open":88.69,"high":92.58,"low":88.69,"close":89.46,"vol":741492.26,"amount":6741604.128},{"date":"2025-08-15","open":89,"high":93.3,"low":88.48,"close":91.84,"vol":690499.46,"amount":6288369.53},{"date":"2025-08-18","open":93.5,"high":95.17,"low":91.36,"close":92.31,"vol":833423.13,"amount":7749849.746},{"date":"2025-08-19","open":91.67,"high":92.48,"low":89.35,"close":89.35,"vol":744652.14,"amount":6762914.098},{"date":"2025-08-20","open":89.4,"high":92.49,"low":88.19,"close":92.28,"vol":858745.56,"amount":7756060.795},{"date":"2025-08-21","open":92.3,"high":94.11,"low":90.8,"close":91.05,"vol":606826.05,"amount":5593619.618},{"date":"2025-08-22","open":92.5,"high":105,"low":92.42,"close":103.97,"vol":2061948.09,"amount":20322967.7},{"date":"2025-08-25","open":106,"high":109.24,"low":101.1,"close":103.17,"vol":1760636.98,"amount":18348502.386},{"date":"2025-08-26","open":101,"high":102.57,"low":100.13,"close":100.93,"vol":856074.09,"amount":8663988.281},{"date":"2025-08-27","open":102.2,"high":106.69,"low":100.59,"close":101.51,"vol":1422620.71,"amount":14762335.293},{"date":"2025-08-28","open":102,"high":119.22,"low":101.99,"close":119.22,"vol":2420325.11,"amount":27118768.322},{"date":"2025-08-29","open":114,"high":116,"low":112.26,"close":114.76,"vol":1639670.37,"amount":18711478.532},{"date":"2025-09-09","open":102,"high":108.65,"low":101.2,"close":102.99,"vol":1574695.7,"amount":16482005.03},{"date":"2025-09-10","open":103,"high":105.96,"low":102.13,"close":103.91,"vol":1039925.7,"amount":10822524.036},{"date":"2025-09-11","open":102.62,"high":112.8,"low":99.98,"close":110.28,"vol":1467501.66,"amount":15776091.423},{"date":"2025-09-12","open":109.28,"high":112.49,"low":108.01,"close":108.42,"vol":1159022.04,"amount":12730296.246},{"date":"2025-09-15","open":110.55,"high":112.55,"low":107.5,"close":108.66,"vol":946836.18,"amount":10395575.384},{"date":"2025-09-16","open":109,"high":111.86,"low":108.09,"close":109.78,"vol":866259.24,"amount":9501062.259},{"date":"2025-09-17","open":110.8,"high":120.8,"low":109.8,"close":117.39,"vol":1528475.61,"amount":17861084.416},{"date":"2025-09-18","open":119.98,"high":127.49,"low":116.35,"close":122.15,"vol":1931567.78,"amount":23495279.107},{"date":"2025-09-19","open":123,"high":127.4,"low":120.11,"close":121.34,"vol":1449106.23,"amount":17943778.048},{"date":"2025-09-22","open":120.54,"high":129.83,"low":119.05,"close":128.92,"vol":1588281.47,"amount":19858613.711},{"date":"2025-09-23","open":127.64,"high":129.33,"low":122.63,"close":128.51,"vol":1441273.53,"amount":18120121.818},{"date":"2025-09-24","open":126.88,"high":137.98,"low":126.23,"close":134.98,"vol":1460947.53,"amount":19497523.266},{"date":"2025-09-25","open":133,"high":137.8,"low":132.31,"close":134.11,"vol":1032583.21,"amount":13953307.668},{"date":"2025-09-26","open":132.71,"high":135.95,"low":131.2,"close":132.27,"vol":912445.19,"amount":12181639.386},{"date":"2025-09-29","open":131,"high":136.02,"low":129.16,"close":136.02,"vol":1027207.23,"amount":13627566.349},{"date":"2025-09-30","open":138.5,"high":142,"low":136.6,"close":140.13,"vol":986229,"amount":13794113.059},{"date":"2025-10-09","open":144,"high":153,"low":137,"close":138.91,"vol":1662841.1,"amount":24249284.345},{"date":"2025-10-10","open":134.87,"high":134.94,"low":127.17,"close":127.95,"vol":1617420.76,"amount":21074152.02},{"date":"2025-10-13","open":126,"high":136.48,"low":126,"close":136.47,"vol":1402994.86,"amount":18642587.057},{"date":"2025-10-14","open":136.96,"high":137.8,"low":125.8,"close":127.2,"vol":1321004.03,"amount":17321652.001},{"date":"2025-10-15","open":127.18,"high":129.73,"low":124.6,"close":129.56,"vol":807987.26,"amount":10284318.328},{"date":"2025-10-16","open":127.8,"high":130.28,"low":126.6,"close":127.3,"vol":612310.62,"amount":7841134.057},{"date":"2025-10-17","open":126.85,"high":127.32,"low":120.87,"close":121.98,"vol":820528.98,"amount":10097285.54},{"date":"2025-10-20","open":124.1,"high":125.18,"low":121.69,"close":122.63,"vol":571239.35,"amount":7060333.63},{"date":"2025-10-21","open":123.8,"high":127.85,"low":122.61,"close":127.19,"vol":784150.88,"amount":9888217.346},{"date":"2025-10-22","open":125.42,"high":129.27,"low":123.81,"close":126.81,"vol":653954.11,"amount":8265031.817},{"date":"2025-10-23","open":125.18,"high":128.5,"low":124.01,"close":128.3,"vol":634264.02,"amount":8038110.025},{"date":"2025-10-24","open":130.3,"high":134.8,"low":128.9,"close":134.06,"vol":1024466.21,"amount":13548726.657},{"date":"2025-10-27","open":137.5,"high":137.5,"low":132.3,"close":134.5,"vol":1012643.04,"amount":13623206.912},{"date":"2025-10-28","open":133,"high":135.8,"low":132,"close":132.69,"vol":695189.45,"amount":9299045.972},{"date":"2025-10-29","open":132,"high":134.53,"low":130.31,"close":133,"vol":688460.74,"amount":9111437.51},{"date":"2025-10-30","open":133,"high":133,"low":128.51,"close":128.55,"vol":692863.97,"amount":9018982.748},{"date":"2025-10-31","open":128.03,"high":128.7,"low":124.18,"close":124.18,"vol":691668.89,"amount":8692098.673},{"date":"2025-11-03","open":122,"high":122.6,"low":117.55,"close":120.21,"vol":747709.27,"amount":8940382.093},{"date":"2025-11-04","open":121,"high":122.66,"low":119,"close":119.88,"vol":477384.17,"amount":5770504.489},{"date":"2025-11-05","open":116.9,"high":121.1,"low":116.5,"close":119.78,"vol":485016,"amount":5753269.424},{"date":"2025-11-06","open":121.9,"high":125.99,"low":121.05,"close":124.85,"vol":731507.65,"amount":9060521.121},{"date":"2025-11-07","open":122.93,"high":124.18,"low":122.05,"close":122.11,"vol":382292.14,"amount":4694221.497},{"date":"2025-11-10","open":122.13,"high":122.95,"low":118.76,"close":120.01,"vol":395832.71,"amount":4749065.264},{"date":"2025-11-11","open":120.6,"high":121.47,"low":117.53,"close":117.73,"vol":342530.08,"amount":4073862.296},{"date":"2025-11-12","open":117,"high":119.8,"low":115.74,"close":119.63,"vol":457015.52,"amount":5405408.039},{"date":"2025-11-13","open":118.99,"high":123.33,"low":117.8,"close":123.1,"vol":549888.53,"amount":6638319.087},{"date":"2025-11-14","open":123,"high":125.5,"low":117.89,"close":118.18,"vol":775293.52,"amount":9432871.553},{"date":"2025-11-17","open":116.82,"high":119.29,"low":116.51,"close":117.63,"vol":421773.41,"amount":4961789.944},{"date":"2025-11-18","open":117.5,"high":120.18,"low":117.13,"close":117.96,"vol":473915.08,"amount":5629538.134},{"date":"2025-11-19","open":117.99,"high":118.49,"low":115.51,"close":116.28,"vol":415119.56,"amount":4848790.041},{"date":"2025-11-20","open":117.99,"high":118.29,"low":116.46,"close":116.78,"vol":344702.85,"amount":4045624.435},{"date":"2025-11-21","open":113.86,"high":116.08,"low":113,"close":113,"vol":461358.62,"amount":5264860.634},{"date":"2025-11-24","open":112.99,"high":113.5,"low":108.18,"close":111.51,"vol":557908.63,"amount":6159093.355},{"date":"2025-11-25","open":112.5,"high":113.96,"low":111.37,"close":111.68,"vol":407223.82,"amount":4584278.768},{"date":"2025-11-26","open":110.7,"high":113.9,"low":110.61,"close":112.71,"vol":419553.57,"amount":4731195.304},{"date":"2025-11-27","open":113.8,"high":116.8,"low":112.56,"close":112.71,"vol":523431.12,"amount":6012840.143},{"date":"2025-11-28","open":112.71,"high":114.11,"low":111.4,"close":113.6,"vol":308663.84,"amount":3486790.036},{"date":"2025-12-01","open":113.4,"high":114.68,"low":112.6,"close":114.4,"vol":327640.04,"amount":3724984.486},{"date":"2025-12-02","open":114.1,"high":114.19,"low":112.7,"close":113,"vol":237771.82,"amount":2694922.636},{"date":"2025-12-03","open":112.8,"high":113.69,"low":111.13,"close":111.62,"vol":245413.59,"amount":2756774.41},{"date":"2025-12-04","open":111.65,"high":114.73,"low":110.98,"close":114.73,"vol":387551.96,"amount":4392462.735},{"date":"2025-12-05","open":114,"high":114.88,"low":112.5,"close":114.18,"vol":352653.66,"amount":4015690.336},{"date":"2025-12-08","open":114.21,"high":118,"low":114.18,"close":117.2,"vol":508359.77,"amount":5945081.548},{"date":"2025-12-09","open":115.58,"high":117.9,"low":115.51,"close":116.32,"vol":371384.45,"amount":4333826.426},{"date":"2025-12-10","open":115.58,"high":116.59,"low":113.44,"close":116.31,"vol":315714.73,"amount":3624511.935},{"date":"2025-12-11","open":116.53,"high":117.14,"low":113.5,"close":113.61,"vol":303108.96,"amount":3488207.042},{"date":"2025-12-12","open":113.61,"high":117.42,"low":111.6,"close":116.8,"vol":584998.04,"amount":6734945.965},{"date":"2025-12-15","open":115.15,"high":116.5,"low":113,"close":113.01,"vol":342417.46,"amount":3933791.146},{"date":"2025-12-16","open":112.5,"high":113.35,"low":110.27,"close":110.7,"vol":323379.53,"amount":3605859.884},{"date":"2025-12-17","open":110.82,"high":113.9,"low":110.13,"close":113.29,"vol":343892.72,"amount":3848931.232},{"date":"2025-12-18","open":112.8,"high":115.72,"low":112.75,"close":112.8,"vol":314700.29,"amount":3583327.202},{"date":"2025-12-19","open":113.2,"high":115.48,"low":113,"close":113.63,"vol":272612.5,"amount":3107493.842},{"date":"2025-12-22","open":114.6,"high":121.44,"low":114.6,"close":120.45,"vol":810113.69,"amount":9622360.396},{"date":"2025-12-23","open":120.5,"high":121.58,"low":119.02,"close":119.9,"vol":483601.42,"amount":5823920.043},{"date":"2025-12-24","open":122.5,"high":124.38,"low":121.11,"close":123.41,"vol":629560.98,"amount":7744549.16},{"date":"2025-12-25","open":123,"high":125.99,"low":122.66,"close":123.08,"vol":471809.58,"amount":5854142.202},{"date":"2025-12-26","open":122.58,"high":124.79,"low":121.16,"close":122.1,"vol":402397.99,"amount":4938389.58},{"date":"2025-12-29","open":123,"high":125.65,"low":122.02,"close":122.5,"vol":506831.61,"amount":6280270.177},{"date":"2025-12-30","open":124.45,"high":126.69,"low":124,"close":125.28,"vol":604958.31,"amount":7582347.029},{"date":"2025-12-31","open":125.99,"high":126.2,"low":122.4,"close":122.83,"vol":411586.85,"amount":5082728.445},{"date":"2026-01-05","open":126.84,"high":130.17,"low":126.2,"close":129.95,"vol":911394.04,"amount":11742866.839},{"date":"2026-01-06","open":129,"high":134.2,"low":128.77,"close":131.84,"vol":730696.95,"amount":9623978.218},{"date":"2026-01-07","open":131.84,"high":132.82,"low":128.85,"close":129.98,"vol":598040.86,"amount":7783876.099},{"date":"2026-01-08","open":128.95,"high":134.68,"low":128.91,"close":130.15,"vol":616918.81,"amount":8145423.327},{"date":"2026-01-09","open":129.15,"high":130.01,"low":127.77,"close":128.88,"vol":511274.88,"amount":6581947.276},{"date":"2026-01-12","open":128.52,"high":129.62,"low":126.68,"close":127.66,"vol":563935.64,"amount":7202156.993},{"date":"2026-01-13","open":127.49,"high":128.15,"low":122.86,"close":123.63,"vol":652072.8,"amount":8154109.676},{"date":"2026-01-14","open":123.51,"high":127.6,"low":123.5,"close":124.49,"vol":649683.91,"amount":8155390.623},{"date":"2026-01-15","open":123.49,"high":125.5,"low":122.33,"close":124.44,"vol":556604.23,"amount":6895087.6},{"date":"2026-01-16","open":127.5,"high":128.82,"low":124.88,"close":126.99,"vol":756512.57,"amount":9597582.828},{"date":"2026-01-19","open":127.05,"high":128.5,"low":125.12,"close":125.29,"vol":477537.02,"amount":6024303.737},{"date":"2026-01-20","open":125,"high":125.5,"low":121.81,"close":122.18,"vol":508693.59,"amount":6261665.024},{"date":"2026-01-21","open":120.93,"high":128.89,"low":120.58,"close":127.19,"vol":970525.21,"amount":12294760.582},{"date":"2026-01-22","open":128.98,"high":130.82,"low":125.57,"close":126.8,"vol":648094.63,"amount":8268996.067},{"date":"2026-01-23","open":126.8,"high":127.37,"low":124.03,"close":124.96,"vol":490631.04,"amount":6130483.631},{"date":"2026-01-26","open":124.01,"high":125.88,"low":121.9,"close":121.92,"vol":502566.5,"amount":6184618.809},{"date":"2026-01-27","open":122,"high":125.74,"low":119.22,"close":124.05,"vol":655261.57,"amount":8023170.134},{"date":"2026-01-28","open":124.99,"high":128.99,"low":124.99,"close":128.55,"vol":994583.26,"amount":12644229.527},{"date":"2026-01-29","open":127.6,"high":127.81,"low":122.16,"close":122.4,"vol":715649.35,"amount":8897091.559},{"date":"2026-01-30","open":121.33,"high":124.94,"low":120.07,"close":122.97,"vol":527719.06,"amount":6468951.529},{"date":"2026-02-02","open":121.4,"high":122.59,"low":116.8,"close":117.06,"vol":596690.81,"amount":7104970.929},{"date":"2026-02-03","open":118.69,"high":118.84,"low":113.46,"close":116.03,"vol":561769.52,"amount":6500024.016},{"date":"2026-02-04","open":114.5,"high":114.99,"low":113.15,"close":114.84,"vol":351393.47,"amount":4005035.637},{"date":"2026-02-05","open":112.99,"high":114.5,"low":110.39,"close":111.8,"vol":446447.65,"amount":4982588.635},{"date":"2026-02-06","open":110.14,"high":114.6,"low":110.14,"close":112.7,"vol":408226.91,"amount":4597784.625},{"date":"2026-02-09","open":114.8,"high":115.07,"low":113.7,"close":114.93,"vol":321018.1,"amount":3676020.764},{"date":"2026-02-10","open":115.2,"high":116.9,"low":114.85,"close":116.2,"vol":340436.51,"amount":3949080.646},{"date":"2026-02-11","open":114,"high":116.14,"low":113.5,"close":115.01,"vol":345336.73,"amount":3955491.126},{"date":"2026-02-12","open":115.55,"high":117.18,"low":115.11,"close":116.58,"vol":333622.54,"amount":3880738.366},{"date":"2026-02-13","open":116.23,"high":117.98,"low":115.56,"close":116.93,"vol":343687.4,"amount":4020570.46},{"date":"2026-02-24","open":118.03,"high":118.18,"low":115.62,"close":115.82,"vol":276155.68,"amount":3217730.655},{"date":"2026-02-25","open":117,"high":117.5,"low":115.85,"close":116.13,"vol":275528.56,"amount":3214693.555},{"date":"2026-02-26","open":116.13,"high":117.23,"low":114.29,"close":116.65,"vol":327021.83,"amount":3787597.479},{"date":"2026-02-27","open":115.03,"high":115.87,"low":114.32,"close":115,"vol":279308.78,"amount":3213704.146},{"date":"2026-03-02","open":112.88,"high":114.2,"low":112.3,"close":112.53,"vol":349784.75,"amount":3952733.063},{"date":"2026-03-03","open":113.23,"high":114.75,"low":107.69,"close":108.31,"vol":540987,"amount":5976584.863},{"date":"2026-03-04","open":107.32,"high":109.7,"low":106.12,"close":106.69,"vol":322749.58,"amount":3470640.119},{"date":"2026-03-05","open":108.6,"high":109.26,"low":106.09,"close":106.9,"vol":353531.81,"amount":3803229.096},{"date":"2026-03-06","open":107,"high":108.34,"low":106.17,"close":106.5,"vol":340486.16,"amount":3648254.394},{"date":"2026-03-09","open":103.97,"high":105.79,"low":101.63,"close":105.14,"vol":393559.67,"amount":4065897.45},{"date":"2026-03-10","open":106.9,"high":107.75,"low":105.7,"close":107.28,"vol":318321.9,"amount":3400130.457},{"date":"2026-03-11","open":107.23,"high":108.8,"low":107,"close":107.1,"vol":279982.97,"amount":3016803.608},{"date":"2026-03-12","open":107,"high":108.55,"low":104.95,"close":106.01,"vol":288819.77,"amount":3075181.737},{"date":"2026-03-13","open":105.02,"high":107.83,"low":104.5,"close":107.06,"vol":341633.26,"amount":3642164.903},{"date":"2026-03-16","open":106.31,"high":110.32,"low":105.5,"close":108.6,"vol":422554.97,"amount":4559220.659},{"date":"2026-03-17","open":108.54,"high":108.58,"low":105.99,"close":106.02,"vol":295718.04,"amount":3173439.587},{"date":"2026-03-18","open":105.78,"high":106.88,"low":105.25,"close":106.6,"vol":263345.92,"amount":2794678.901},{"date":"2026-03-19","open":105.01,"high":107.69,"low":104.51,"close":105.96,"vol":378655.95,"amount":4001785.717},{"date":"2026-03-20","open":105.2,"high":105.72,"low":102.18,"close":102.18,"vol":381294.75,"amount":3960183.826},{"date":"2026-03-23","open":100.01,"high":101.99,"low":97.4,"close":98.04,"vol":506671.26,"amount":5040929.175},{"date":"2026-03-24","open":98.9,"high":99.37,"low":97.25,"close":99.25,"vol":336803.26,"amount":3314641.85},{"date":"2026-03-25","open":99.67,"high":100.94,"low":99.28,"close":99.99,"vol":321306.43,"amount":3215491.219},{"date":"2026-03-26","open":99.55,"high":99.7,"low":96.55,"close":96.88,"vol":313198.89,"amount":3067688.006},{"date":"2026-03-27","open":96,"high":98.39,"low":95.87,"close":97.5,"vol":280875.27,"amount":2738255.865},{"date":"2026-03-30","open":95.8,"high":96.19,"low":94,"close":95.83,"vol":328870.03,"amount":3130020.525},{"date":"2026-03-31","open":95.8,"high":97.4,"low":94,"close":94.05,"vol":293839.03,"amount":2809492.923},{"date":"2026-04-01","open":96.4,"high":96.7,"low":94.81,"close":96.33,"vol":325648.08,"amount":3121615.312},{"date":"2026-04-02","open":95.5,"high":95.79,"low":92.51,"close":93.2,"vol":293828.32,"amount":2760191.974},{"date":"2026-04-03","open":93.41,"high":93.94,"low":91.76,"close":91.78,"vol":216461.63,"amount":2004261.621},{"date":"2026-04-07","open":91.5,"high":96.99,"low":91.2,"close":95.62,"vol":458242.31,"amount":4340589.11},{"date":"2026-04-08","open":99.02,"high":101.54,"low":99.02,"close":101.18,"vol":544697.12,"amount":5458085.866},{"date":"2026-04-09","open":99.4,"high":101.2,"low":99.2,"close":99.72,"vol":310716.53,"amount":3111335.889},{"date":"2026-04-10","open":101,"high":102.79,"low":100.68,"close":101.01,"vol":406305.14,"amount":4130861.809},{"date":"2026-04-13","open":99.85,"high":102.8,"low":99.72,"close":100.64,"vol":351885.22,"amount":3554994.262},{"date":"2026-04-14","open":102.1,"high":102.28,"low":100.38,"close":101.52,"vol":370910.59,"amount":3760621.304},{"date":"2026-04-15","open":102.05,"high":106.1,"low":101.8,"close":103.91,"vol":704839,"amount":7336887.912},{"date":"2026-04-16","open":103.5,"high":105,"low":103,"close":104.18,"vol":393721.35,"amount":4092706.42},{"date":"2026-04-17","open":103.82,"high":107.3,"low":103.27,"close":105.23,"vol":503755.27,"amount":5313222.52},{"date":"2026-04-20","open":105.93,"high":108.6,"low":105.01,"close":107.96,"vol":547702.62,"amount":5872447.693},{"date":"2026-04-21","open":107.33,"high":108.15,"low":105.68,"close":107.46,"vol":372584.25,"amount":3976054.595},{"date":"2026-04-22","open":106.8,"high":108.08,"low":106.5,"close":107.87,"vol":375216.74,"amount":4023321.89},{"date":"2026-04-23","open":108.88,"high":109.12,"low":105.2,"close":105.98,"vol":441491.01,"amount":4724880.091},{"date":"2026-04-24","open":105.58,"high":113.25,"low":104.61,"close":110.96,"vol":910703.63,"amount":9980491.748},{"date":"2026-04-27","open":113.25,"high":117.69,"low":112.6,"close":116.58,"vol":970295.86,"amount":11249548.325},{"date":"2026-04-28","open":115.24,"high":117.64,"low":113.02,"close":114,"vol":625007.3,"amount":7209850.228},{"date":"2026-04-29","open":113.35,"high":113.82,"low":109.78,"close":112.47,"vol":514882.54,"amount":5750212.698},{"date":"2026-04-30","open":113.31,"high":119.88,"low":113.3,"close":118.73,"vol":1018382.85,"amount":11911527.206},{"date":"2026-05-06","open":122,"high":128.12,"low":121.74,"close":123.1,"vol":1292940.51,"amount":16176667.799},{"date":"2026-05-07","open":125.11,"high":127.48,"low":122.22,"close":125.34,"vol":842774.03,"amount":10482928.52},{"date":"2026-05-08","open":122.9,"high":123.19,"low":120.05,"close":120.31,"vol":708618.1,"amount":8595731.864},{"date":"2026-05-11","open":122.99,"high":124.57,"low":121.9,"close":122.52,"vol":814859.72,"amount":10017304.327},{"date":"2026-05-12","open":124.44,"high":125.44,"low":120,"close":121.98,"vol":817732.34,"amount":10018643.228},{"date":"2026-05-13","open":119,"high":122.5,"low":116.04,"close":121.86,"vol":954951.48,"amount":11374279.337},{"date":"2026-05-14","open":121.92,"high":124.04,"low":117,"close":117.9,"vol":790650.15,"amount":9451219.953},{"date":"2026-05-15","open":121,"high":125,"low":118.48,"close":119.02,"vol":1328100.54,"amount":16152497.227},{"date":"2026-05-18","open":117.4,"high":120.34,"low":115.6,"close":117.62,"vol":748969.19,"amount":8855418.364},{"date":"2026-05-19","open":116.16,"high":118.88,"low":112.68,"close":118.82,"vol":840269.78,"amount":9713877.346},{"date":"2026-05-20","open":118,"high":136.63,"low":117.5,"close":133.81,"vol":2248800.56,"amount":28996720.135},{"date":"2026-05-21","open":134,"high":137.63,"low":127.1,"close":127.22,"vol":1546776.71,"amount":20601829.525},{"date":"2026-05-22","open":129.33,"high":132.18,"low":126.5,"close":131.33,"vol":1199477.88,"amount":15516843.653},{"date":"2026-05-25","open":136,"high":157.6,"low":136,"close":156,"vol":2521802.26,"amount":37253708.024},{"date":"2026-05-26","open":150.73,"high":154.44,"low":145.5,"close":149.18,"vol":1799242.41,"amount":26787296.677},{"date":"2026-05-27","open":150,"high":153.52,"low":145,"close":146.22,"vol":1234983.75,"amount":18473692.356},{"date":"2026-05-28","open":146,"high":159.05,"low":146,"close":153.7,"vol":1608231.75,"amount":24822318.598},{"date":"2026-05-29","open":150.92,"high":152.38,"low":138.49,"close":139.91,"vol":1536812.64,"amount":22138462.395},{"date":"2026-06-01","open":139.76,"high":140.8,"low":132.04,"close":132.44,"vol":1008849.14,"amount":13645017.172},{"date":"2026-06-02","open":132.98,"high":135.5,"low":129.3,"close":132.48,"vol":923688.2,"amount":12256037.221},{"date":"2026-06-03","open":132,"high":138.75,"low":131.85,"close":134,"vol":992127.45,"amount":13487781.965},{"date":"2026-06-04","open":131,"high":137.57,"low":130,"close":134.88,"vol":778526.88,"amount":10493292.686},{"date":"2026-06-05","open":131,"high":134.75,"low":126.7,"close":127.4,"vol":934574.33,"amount":12150117.807},{"date":"2026-06-08","open":120,"high":124.28,"low":120,"close":121.92,"vol":781225.59,"amount":9545783.582},{"date":"2026-06-09","open":123.5,"high":128.03,"low":120.89,"close":127.3,"vol":769662.77,"amount":9607775.526},{"date":"2026-06-10","open":125,"high":131.18,"low":124.5,"close":125.34,"vol":669094.14,"amount":8511488.618},{"date":"2026-06-11","open":124,"high":129.08,"low":123.01,"close":127.4,"vol":626275.99,"amount":7935636.355},{"date":"2026-06-12","open":131.64,"high":134.87,"low":124.37,"close":124.88,"vol":817437.29,"amount":10575818.607},{"date":"2026-06-15","open":128.59,"high":131,"low":124.89,"close":130.52,"vol":728604.09,"amount":9404695.623},{"date":"2026-06-16","open":131,"high":134.34,"low":127.93,"close":130.14,"vol":745583.01,"amount":9738547.521},{"date":"2026-06-17","open":127.91,"high":134.88,"low":126.68,"close":134.7,"vol":963562.12,"amount":12699097.858},{"date":"2026-06-18","open":136.11,"high":144.63,"low":132.88,"close":140.7,"vol":1244937.14,"amount":17289251.566},{"date":"2026-06-22","open":140.78,"high":148,"low":140,"close":145.59,"vol":1060960.58,"amount":15251149.626},{"date":"2026-06-23","open":143.58,"high":148.3,"low":139.6,"close":141.7,"vol":918201.09,"amount":13211881.994},{"date":"2026-06-24","open":141.5,"high":156.35,"low":141.32,"close":151.53,"vol":1411623.83,"amount":21160854.009},{"date":"2026-06-25","open":152,"high":158.66,"low":151,"close":156.86,"vol":1186102.37,"amount":18470621.628},{"date":"2026-06-26","open":153.7,"high":156.22,"low":146.5,"close":148.76,"vol":1076155.43,"amount":16171921.139},{"date":"2026-06-29","open":147.8,"high":152.99,"low":141,"close":151,"vol":1027401.01,"amount":15158412.01},{"date":"2026-06-30","open":152.05,"high":160.66,"low":150,"close":158.82,"vol":1066795.41,"amount":16679545.014},{"date":"2026-07-01","open":160.19,"high":166.88,"low":152.31,"close":154.48,"vol":1146777.18,"amount":18327904.135},{"date":"2026-07-02","open":146.5,"high":151.69,"low":141.26,"close":144.1,"vol":949023.64,"amount":13942694.264},{"date":"2026-07-03","open":144.89,"high":146.45,"low":140.2,"close":140.31,"vol":770411.78,"amount":11011795.924}];
+
+    (function() {
+        var rawData = EMBEDDED_DATA;
+        renderCharts(rawData);
+        updateStats(rawData);
+
+        function updateStats(data) {
+            if (!data || data.length === 0) return;
+
+            const latest = data[data.length - 1];
+            const first = data[0];
+            const yearChange = latest.close - first.close;
+            const yearChangePct = (yearChange / first.close * 100).toFixed(2);
+
+            // Latest
+            const latestPrice = document.getElementById('latest-price');
+            latestPrice.textContent = '¥' + latest.close.toFixed(2);
+            const changeClass = latest.close >= latest.open ? 'up' : 'down';
+            latestPrice.className = 'stat-value ' + changeClass;
+
+            const pctChange = ((latest.close - latest.open) / latest.open * 100).toFixed(2);
+            const latestChange = document.getElementById('latest-change');
+            const pctStr = (pctChange >= 0 ? '+' : '') + pctChange + '%';
+            latestChange.textContent = pctStr;
+            latestChange.className = 'stat-value ' + changeClass;
+
+            document.getElementById('latest-vol').textContent = (latest.vol / 10000).toFixed(2) + '万手';
+
+            // Date range
+            document.getElementById('date-range').textContent = data[0].date + ' ~ ' + latest.date;
+
+            // Summary
+            let prices = data.map(d => d.close);
+            let maxP = Math.max(...prices);
+            let minP = Math.min(...prices);
+            let maxDay = data.find(d => d.close === maxP);
+            let minDay = data.find(d => d.close === minP);
+
+            document.getElementById('max-price').textContent = '¥' + maxP.toFixed(2);
+            document.getElementById('max-date').textContent = maxDay.date;
+            document.getElementById('min-price').textContent = '¥' + minP.toFixed(2);
+            document.getElementById('min-date').textContent = minDay.date;
+
+            let yearCh = document.getElementById('year-change');
+            yearCh.textContent = (yearChange >= 0 ? '+' : '') + yearChange.toFixed(2);
+            yearCh.style.color = yearChange >= 0 ? 'var(--red)' : 'var(--green)';
+
+            let yrPct = document.getElementById('year-change-pct');
+            yrPct.textContent = (yearChangePct >= 0 ? '+' : '') + yearChangePct + '%';
+            yrPct.className = yearChange >= 0 ? 'change up' : 'change down';
+
+            let avgVol = data.reduce((s, d) => s + d.vol, 0) / data.length;
+            document.getElementById('avg-vol').textContent = (avgVol / 10000).toFixed(1) + '万';
+
+            let avgAmt = data.reduce((s, d) => s + d.amount, 0) / data.length;
+            document.getElementById('avg-amount').textContent = (avgAmt / 10000).toFixed(1) + '亿';
+
+            document.getElementById('total-days').textContent = data.length;
+        }
+
+        function renderCharts(rawData) {
+            // Prepare OHLC data: [open, close, low, high] for candlestick
+            const dates = rawData.map(d => d.date);
+            const ohlc = rawData.map(d => [d.open, d.close, d.low, d.high]);
+            const volumes = rawData.map(d => d.vol);
+            const closes = rawData.map(d => d.close);
+
+            // Calculate MAs
+            function calcMA(data, period) {
+                const result = [];
+                for (let i = 0; i < data.length; i++) {
+                    if (i < period - 1) { result.push(null); continue; }
+                    let sum = 0;
+                    for (let j = 0; j < period; j++) sum += data[i - j];
+                    result.push(+(sum / period).toFixed(2));
+                }
+                return result;
+            }
+
+            const ma5 = calcMA(closes, 5);
+            const ma10 = calcMA(closes, 10);
+            const ma20 = calcMA(closes, 20);
+            const ma60 = calcMA(closes, 60);
+
+            // Volume color: red if close >= open (up day), green if close < open (down day)
+            const volumeColors = rawData.map(d => d.close >= d.open ? '#ef5350' : '#26a69a');
+
+            // ============= K-line Chart =============
+            const klineChart = echarts.init(document.getElementById('kline-chart'));
+
+            const klineOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        crossStyle: { color: '#999' },
+                        label: { backgroundColor: '#6a7985' }
+                    },
+                    formatter: function(params) {
+                        if (!params || params.length === 0) return '';
+                        const p = params[0];
+                        const i = p.dataIndex;
+                        const d = rawData[i];
+                        if (!d) return '';
+                        const color = d.close >= d.open ? '#ef5350' : '#26a69a';
+                        const changeSign = d.close >= d.open ? '+' : '';
+                        const change = (d.close - d.open).toFixed(2);
+                        const chgPct = ((d.close - d.open) / d.open * 100).toFixed(2);
+
+                        let html = '<div style="font-size:13px;font-weight:700;margin-bottom:6px">'
+                            + d.date + '</div>';
+                        html += '<table style="font-size:12px;border-collapse:collapse">';
+                        html += '<tr><td style="color:#999">开盘</td><td style="font-weight:600;padding-left:12px">' + d.open.toFixed(2) + '</td></tr>';
+                        html += '<tr><td style="color:#999">收盘</td><td style="font-weight:600;color:' + color + ';padding-left:12px">' + d.close.toFixed(2) + '</td></tr>';
+                        html += '<tr><td style="color:#999">最高</td><td style="font-weight:600;color:#ef5350;padding-left:12px">' + d.high.toFixed(2) + '</td></tr>';
+                        html += '<tr><td style="color:#999">最低</td><td style="font-weight:600;color:#26a69a;padding-left:12px">' + d.low.toFixed(2) + '</td></tr>';
+                        html += '<tr><td style="color:#999">涨跌</td><td style="font-weight:600;color:' + color + ';padding-left:12px">' + changeSign + change + ' / ' + changeSign + chgPct + '%</td></tr>';
+                        html += '<tr><td style="color:#999">成交量</td><td style="font-weight:600;padding-left:12px">' + (d.vol / 10000).toFixed(2) + '万手</td></tr>';
+                        html += '<tr><td style="color:#999">成交额</td><td style="font-weight:600;padding-left:12px">' + (d.amount / 10000).toFixed(2) + '亿元</td></tr>';
+                        html += '</table>';
+
+                        // MA values
+                        if (ma5[i]) html += '<div style="font-size:11px;color:#f5a623;margin-top:4px">MA5: ' + ma5[i] + '</div>';
+                        if (ma10[i]) html += '<div style="font-size:11px;color:#4a90d9">MA10: ' + ma10[i] + '</div>';
+                        if (ma20[i]) html += '<div style="font-size:11px;color:#e040fb">MA20: ' + ma20[i] + '</div>';
+                        if (ma60[i]) html += '<div style="font-size:11px;color:#7e57c2">MA60: ' + ma60[i] + '</div>';
+
+                        return html;
+                    }
+                },
+                legend: {
+                    data: ['中芯国际', 'MA5', 'MA10', 'MA20', 'MA60'],
+                    top: 10,
+                    left: 'center',
+                    textStyle: { fontSize: 12 }
+                },
+                grid: [
+                    { left: 70, right: 50, top: 50, height: '75%' }
+                ],
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisLine: { lineStyle: { color: '#ddd' } },
+                    axisLabel: {
+                        fontSize: 11,
+                        color: '#999',
+                        formatter: function(val) {
+                            return val.length === 10 ? val.substring(5) : val;
+                        },
+                        interval: Math.floor(dates.length / 8)
+                    },
+                    axisTick: { show: false }
+                },
+                yAxis: {
+                    type: 'value',
+                    scale: true,
+                    splitNumber: 6,
+                    axisLabel: {
+                        fontSize: 11,
+                        color: '#999',
+                        formatter: function(v) { return v.toFixed(1); }
+                    },
+                    splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } },
+                    axisLine: { show: false },
+                    axisTick: { show: false }
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        start: 50,
+                        end: 100
+                    },
+                    {
+                        type: 'slider',
+                        start: 50,
+                        end: 100,
+                        height: 24,
+                        bottom: 10,
+                        borderColor: '#e5e5e5',
+                        fillerColor: 'rgba(74,144,217,0.15)',
+                        handleStyle: { color: '#4a90d9' },
+                        textStyle: { fontSize: 10 }
+                    }
+                ],
+                series: [
+                    {
+                        name: '中芯国际',
+                        type: 'candlestick',
+                        data: ohlc,
+                        itemStyle: {
+                            color: '#ef5350',
+                            color0: '#26a69a',
+                            borderColor: '#ef5350',
+                            borderColor0: '#26a69a'
+                        },
+                        markLine: {
+                            silent: true,
+                            symbol: 'none',
+                            lineStyle: { color: '#999', type: 'dashed', opacity: 0.4 },
+                            data: [
+                                { yAxis: 'max', label: { formatter: '最高: {c}', fontSize: 10, position: 'end' } },
+                                { yAxis: 'min', label: { formatter: '最低: {c}', fontSize: 10, position: 'start' } }
+                            ]
+                        }
+                    },
+                    {
+                        name: 'MA5',
+                        type: 'line',
+                        data: ma5,
+                        smooth: true,
+                        symbol: 'none',
+                        lineStyle: { color: '#f5a623', width: 1.2 },
+                        itemStyle: { color: '#f5a623' }
+                    },
+                    {
+                        name: 'MA10',
+                        type: 'line',
+                        data: ma10,
+                        smooth: true,
+                        symbol: 'none',
+                        lineStyle: { color: '#4a90d9', width: 1.2 },
+                        itemStyle: { color: '#4a90d9' }
+                    },
+                    {
+                        name: 'MA20',
+                        type: 'line',
+                        data: ma20,
+                        smooth: true,
+                        symbol: 'none',
+                        lineStyle: { color: '#e040fb', width: 1.2 },
+                        itemStyle: { color: '#e040fb' }
+                    },
+                    {
+                        name: 'MA60',
+                        type: 'line',
+                        data: ma60,
+                        smooth: true,
+                        symbol: 'none',
+                        lineStyle: { color: '#7e57c2', width: 1 },
+                        itemStyle: { color: '#7e57c2' }
+                    }
+                ]
+            };
+
+            klineChart.setOption(klineOption);
+            window.addEventListener('resize', () => klineChart.resize());
+
+            // ============= Volume Chart =============
+            const volumeChart = echarts.init(document.getElementById('volume-chart'));
+
+            const volumeOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: function(params) {
+                        if (!params || params.length === 0) return '';
+                        const i = params[0].dataIndex;
+                        const d = rawData[i];
+                        if (!d) return '';
+                        return '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + d.date + '</div>'
+                            + '<div style="font-size:12px">成交量: <b>' + (d.vol / 10000).toFixed(2) + '万手</b></div>'
+                            + '<div style="font-size:12px">成交额: <b>' + (d.amount / 10000).toFixed(2) + '亿元</b></div>';
+                    }
+                },
+                grid: [
+                    { left: 70, right: 50, top: 10, bottom: 30 }
+                ],
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisLine: { show: false },
+                    axisLabel: {
+                        fontSize: 11,
+                        color: '#999',
+                        formatter: function(val) {
+                            return val.length === 10 ? val.substring(5) : val;
+                        },
+                        interval: Math.floor(dates.length / 8)
+                    },
+                    axisTick: { show: false }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        fontSize: 11,
+                        color: '#999',
+                        formatter: function(v) {
+                            return (v / 10000).toFixed(0) + '万';
+                        }
+                    },
+                    splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } },
+                    axisLine: { show: false },
+                    axisTick: { show: false }
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        start: 50,
+                        end: 100,
+                        xAxisIndex: 0
+                    }
+                ],
+                series: [
+                    {
+                        name: '成交量',
+                        type: 'bar',
+                        data: volumes.map((v, i) => ({
+                            value: v,
+                            itemStyle: { color: volumeColors[i] }
+                        })),
+                        barWidth: '60%'
+                    }
+                ]
+            };
+
+            volumeChart.setOption(volumeOption);
+
+            // Sync dataZoom between charts
+            klineChart.group = '688981_group';
+            volumeChart.group = '688981_group';
+            echarts.connect('688981_group');
+
+            window.addEventListener('resize', () => volumeChart.resize());
+        }
+
+        // Dark mode support - simple check
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.style.setProperty('--bg', '#1a1a2e');
+            document.documentElement.style.setProperty('--card-bg', '#222240');
+            document.documentElement.style.setProperty('--text', '#e0e0e0');
+            document.documentElement.style.setProperty('--subtext', '#888');
+            document.documentElement.style.setProperty('--border', '#333');
+            document.body.style.background = '#16162a';
+        }
+    })();
+    </script>
+</body>
+</html>
